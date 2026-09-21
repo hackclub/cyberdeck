@@ -1,0 +1,25 @@
+<%# One RSVP box. `slot` names the anchor the page returns to after the
+    post, "top" in the hero or "rsvp-end" after the FAQ. The flash carries
+    the outcome, so both boxes show the same state. prefill_controller.js
+    fills the field from Hack Club Auth when the visitor is signed in there. %>
+<% if flash[:rsvp_done] %>
+  <p class="rsvp-done" aria-live="polite"><%= flash[:rsvp_done] %></p>
+<% else %>
+  <%= form_with url: rsvp_path, method: :post, class: "rsvp", data: { turbo: false, controller: "prefill" } do |f| %>
+    <div class="rsvp-row">
+      <%= f.email_field :email, value: flash[:rsvp_email], placeholder: "your@email.here",
+                        autocomplete: "email", required: true, aria: { label: "Your email" },
+                        data: { prefill_target: "email" } %>
+      <%= f.button "RSVP", type: "submit", class: "btn btn-rsvp" %>
+    </div>
+    <%= f.hidden_field :slot, value: slot %>
+    <% (@utm || {}).each do |key, value| %>
+      <%= f.hidden_field key, value: value %>
+    <% end %>
+    <%# The honeypot. A person never sees it. A bot fills it and is dropped. %>
+    <%= f.text_field RsvpsController::HONEYPOT, class: "hp", tabindex: -1, autocomplete: "off", aria: { hidden: true } %>
+  <% end %>
+  <% if flash[:rsvp_error] %>
+    <p class="rsvp-error" aria-live="polite"><%= flash[:rsvp_error] %></p>
+  <% end %>
+<% end %>

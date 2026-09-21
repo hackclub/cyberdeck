@@ -1,0 +1,28 @@
+<% content_for :title, "All connected" %>
+<main class="flow">
+  <div class="sheet">
+      <%= render "onboarding/progress", steps: @steps, done_keys: @done_keys, current: nil, just_completed: @just_done %>
+
+      <%# Armand's copy, 2026-09-18. %>
+      <p class="lede">That's all three, <%= @participant.first_name %>. Next, we'll get your editor set up.
+      Have you done this before?</p>
+
+      <div class="choices">
+        <div class="choice recommended">
+          <p class="choice-tag">Recommended</p>
+          <strong>This is my first project</strong>
+          <p>That's great! We'll create the project and open an editor in your browser for you
+          so you can get started immediately!</p>
+          <%= button_to "Set up my editor", projects_path, params: { kind: "codespace" }, class: "primary" %>
+        </div>
+
+        <div class="choice">
+          <p class="choice-tag">Advanced</p>
+          <strong>I know what I'm doing</strong>
+          <p>Best if you already have VS-Code installed. Set up your own development
+          environment, and just follow along with the guide</p>
+          <%= button_to "Let me do it myself", projects_path, params: { kind: "local" }, class: "secondary" %>
+        </div>
+      </div>
+  </div>
+</main>

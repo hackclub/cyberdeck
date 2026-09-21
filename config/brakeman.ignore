@@ -1,0 +1,11 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Dynamic Render Path",
+      "fingerprint": "6b3e60dac631bbf753f3ec9c42952d31060692146bd08441b8ca24cef9dcf649",
+      "note": "OnboardingController#connect renders params[:provider] only after the value passed presence in STEPS, three literal keys. A value outside the list redirects to /start first. 2026-09-21."
+    }
+  ],
+  "updated": "2026-09-21",
+  "brakeman_version": "7"
+}

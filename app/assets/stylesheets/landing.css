@@ -1,0 +1,262 @@
+/* Landing page layout. Design: Armand's Figma frames of 2026-09-17.
+ * The shared look (ground, frame, fonts, buttons, headings, panels) lives
+ * in cyberdeck.css and applies to every page. Only the landing page's own
+ * layout is here, scoped to body.landing-page where it could clash. */
+
+/* The pink frame, inset from the edges and running the whole length of
+ * the page. Armand, 2026-09-18: "the red outline should extend to the
+ * entire website". */
+.landing-page::after {
+  content: ""; position: absolute; inset: 36px; z-index: 3;
+  border: 1.5px solid var(--pink); pointer-events: none;
+}
+/* The cutting mat, once, behind the whole page, so the grid never restarts
+ * at a fold. The SVG is white lines on nothing, cropped to the grid inside
+ * its ruler margin, 1800 wide with 120px cells, scaled to the viewport.
+ * Armand, 2026-09-18: continuous over the site, zoomed so no edge shows. */
+.landing-page::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: url("landing/craft-mat.svg") top center / 130% auto repeat-y;
+  opacity: .22; pointer-events: none;
+}
+.landing-page > * { position: relative; z-index: 1; }
+
+/* --- hero --------------------------------------------------------------- */
+/* The hero is not a stacking context, so its children order themselves
+ * against the pink frame (z 3): the LCD, Pico and wires pass behind the
+ * line, the ribbon and the button sit on it. As in hero.png. Armand,
+ * 2026-09-18: "the microcontroller and display should be behind the red
+ * line, like the wires". */
+.landing-page .hero {
+  z-index: auto;
+  min-height: 100svh; display: grid; place-items: center;
+  padding: 120px 20px 140px; text-align: center; overflow: hidden;
+}
+.badge { position: absolute; top: 4.6vw; left: 0; width: min(215px, 17.5vw); z-index: 4; }
+.badge img { width: 100%; height: auto; display: block; }
+/* The button's outer border coincides with the frame line, both at 36 px. */
+.btn-login { position: absolute; top: 36px; right: 36px; z-index: 4; }
+
+/* The corner props, measured against hero.png, Armand's 1204 px frame.
+ * Everything scales with the viewport up to the frame's own size, and
+ * stops there. Armand, 2026-09-18: "too large in a real browser".
+ * The LCD sits in front of the Pico, the Pico leans right, top off screen. */
+.prop { position: absolute; z-index: 1; pointer-events: none; height: auto; filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)); }
+/* No parallax. The cursor and Perlin drift of 2026-09-18 came out on
+ * 2026-09-21. Armand: "get rid of the paralax". */
+.prop-display { width: min(42vw, 506px); top: max(-7.65vw, -92px); right: 3.4%; transform: rotate(-5deg); z-index: 2; }
+.prop-pico    { width: min(19vw, 229px); top: max(-12.3vw, -148px); right: 1.25%; transform: rotate(3deg); }
+.prop-wires   { width: min(38.5vw, 464px); top: 64svh; left: -15%;  transform: rotate(8deg); z-index: 1; }
+
+.hero-copy { position: relative; z-index: 2; max-width: 46rem; }
+.title { margin: 0 0 18px; }
+.title-img { width: min(705px, 92vw); height: auto; display: block; margin: 0 auto; }
+.tagline { font-size: clamp(1.1rem, 1.8vw, 1.35rem); margin: 0 0 6px; }
+.fineprint { font-size: .8rem; color: #cfcfcf; margin: 0 0 28px; }
+.fineprint a { color: #e6e6e6; }
+.actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* The RSVP box, while sign-ups are closed. Armand's mockup of 2026-09-21:
+ * a dark email field with a thin pink border and a solid pink RSVP button,
+ * one slab, in the body face. The same box sits at the end of the FAQ. */
+.rsvp { display: flex; justify-content: center; margin: 0; }
+.rsvp-row { display: flex; width: min(36rem, 100%); }
+.rsvp input[type="email"] {
+  flex: 1 1 auto; min-width: 0; margin: 0;
+  font: inherit; font-size: 1.5rem; line-height: 1.3; color: var(--ink);
+  padding: 12px 22px; background: rgba(0, 0, 0, .55);
+  border: 1.5px solid var(--pink); border-right: 0; border-radius: 0; outline: 0;
+}
+.rsvp input[type="email"]::placeholder { color: #8f8f8f; opacity: 1; }
+.rsvp input[type="email"]:focus-visible { background: var(--black); }
+.landing-page .rsvp .btn-rsvp {
+  flex: none; font-size: 1.5rem; padding: 12px 30px;
+  background: var(--pink); color: var(--paper); border-color: var(--pink);
+}
+.landing-page .rsvp .btn-rsvp:hover { background: #ff3d85; border-color: #ff3d85; }
+/* The honeypot. Off screen, not tabbable, not announced. Only bots fill it. */
+.rsvp .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.rsvp-done { margin: 0; font-size: 1.35rem; color: var(--pink-pale); }
+.rsvp-error { margin: 10px 0 0; font-size: .95rem; color: var(--pink-pale); }
+.cta-end .rsvp-error { text-align: center; }
+
+.scroll-hint {
+  position: absolute; left: 50%; bottom: 56px; transform: translateX(-50%);
+  color: var(--pink-pale); z-index: 2; animation: bob 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes bob { 0%,100% { transform: translate(-50%, 0) } 50% { transform: translate(-50%, 8px) } }
+
+/* --- folds ----------------------------------------------------------- */
+.folds { padding: 0 0 40px; }
+/* One fold per screen, content centred, as in the frames. */
+/* Side padding is the 36 px frame inset plus 36 px, so no panel crosses the
+ * pink line. Armand, 2026-09-18: "none of these containers should go past
+ * the red line". The cards tilt, so they get more room below. */
+.fold { max-width: 1010px; margin: 0 auto; padding: 48px 72px; position: relative;
+  min-height: 100svh; display: grid; align-content: center; }
+.fold-hc { max-width: none; padding-left: 72px; padding-right: 72px; }
+/* Wider than the other folds so the four cards get room and the text wraps less. */
+.fold-how { max-width: 1280px; padding-left: 84px; padding-right: 84px; }
+.fold-how .heading { margin-left: 6%; }
+.fold-faq { max-width: 1120px; }
+.fold-hc .heading { margin: 0 0 -28px 2%; position: relative; z-index: 2; }
+.fold-faq .heading { margin-left: 2%; }
+
+.fold-what .poly { margin: 0 auto; }
+/* The first panel breathes: roomier padding, same text size. Armand, 2026-09-18. */
+.fold-what .poly-in { padding: 64px 88px 68px; }
+.fold-what .poly-in ol li { margin-bottom: .4em; }
+
+/* how it works: four tilted cards, each with one of Armand's step drawings,
+ * white lines on the dark card. Armand, 2026-09-18. */
+.cards { list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; align-items: start; }
+.card .poly-in { padding: 36px 34px 40px; display: grid; grid-template-rows: auto 1fr; gap: 24px; align-items: end; }
+.card p { font-size: .95em; margin: 0; }
+.how-img { display: block; width: 100%; height: auto; }
+.card .num { display: inline-block; margin-right: .2em; }
+.cards li:nth-child(2) { margin-top: 48px; }
+.cards li:nth-child(4) { margin-top: 32px; }
+
+/* Image placeholders, until the photos exist. */
+.img-slot {
+  display: grid; place-items: center; aspect-ratio: 1; background: var(--paper); color: #111;
+  font-size: 1.05rem;
+}
+.img-slot-dark { background: transparent; color: #cfcfcf; border: 1px dashed rgba(255,255,255,.35); aspect-ratio: auto; }
+
+/* parts grid */
+.parts { list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.part .poly-in { padding: 30px 40px 32px; display: grid; gap: 14px; justify-items: center; text-align: center; min-height: 240px; align-content: center; }
+.part-img { max-height: 140px; width: auto; max-width: 100%; }
+.part .img-slot { width: 100%; aspect-ratio: 16 / 9; }
+.part strong { font-weight: inherit; font-size: 1em; }
+/* The last tile says "and more…" in the heading face, no image. */
+.part-more strong { font-family: var(--heading); font-size: 48px; line-height: 1; color: var(--pink);
+  -webkit-font-smoothing: none; text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff; }
+
+/* what is hack club */
+/* The Hack Club fold: the panel sits centred, and six event photos fan out
+ * in two arcs either side, top photo nearest the panel, bottom photo furthest
+ * out, using the whole height of the fold. Armand's sketch, 2026-09-18. */
+.hc-row { position: relative; display: grid; justify-items: center; align-items: center; min-height: 72svh; }
+.hc-center { width: min(50%, 720px); position: relative; z-index: 1; }
+.hc-center > .poly { width: 100%; }
+.snaps { list-style: none; margin: 0; padding: 0; }
+.snaps li { position: absolute; width: 21%; transform: rotate(var(--r, 0deg)); }
+.snaps img { display: block; width: 100%; height: auto; border: 4px solid var(--paper); box-shadow: 0 8px 22px rgba(0,0,0,.65); }
+/* Arc positions, as a share of the fold. Left arc, top to bottom. */
+.snaps-left  li:nth-child(1) { left: 5%;  top: 0; }
+.snaps-left  li:nth-child(2) { left: 0.5%; top: 34%; z-index: 1; }
+.snaps-left  li:nth-child(3) { left: 4%;  top: 66%; }
+.snaps-right li:nth-child(1) { right: 5%;  top: 0; }
+.snaps-right li:nth-child(2) { right: 0.5%; top: 34%; z-index: 1; }
+.snaps-right li:nth-child(3) { right: 4%;  top: 66%; }
+/* Uniform padding, so the centred text sits in the middle of the panel.
+ * Armand, 2026-09-18. */
+.fold-hc .poly-in { padding: 56px 90px; }
+
+/* faq */
+.faq { margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+.faq-item .poly-in { padding: 36px 44px; min-height: 200px; }
+.faq dt { font-size: 1.1em; margin: 0 0 .5em; color: var(--pink-pale); }
+.faq dd { margin: 0; }
+.cta-end { text-align: center; margin-top: 64px; }
+.foot { text-align: center; color: #bdbdbd; font-size: .95rem; padding: 0 24px; }
+.foot p { margin: 0 0 .5em; }
+/* The handbook's required footer links, one row, wrapping on phones. */
+.foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: .4em 2.4em; font-size: 1rem; }
+
+/* --- narrow screens ------------------------------------------------------ */
+@media (max-width: 900px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .card .poly-in { min-height: 0; }
+  .fold { min-height: 0; }
+  .fold-hc .heading { margin-bottom: 24px; }
+  .cards li:nth-child(2), .cards li:nth-child(4) { margin-top: 0; }
+  .parts { grid-template-columns: repeat(2, 1fr); }
+  .hc-row { grid-template-columns: 1fr; }
+  .hc-row { min-height: 0; }
+  .hc-center { width: 100%; }
+  .fold-hc .heading { margin: 0 0 24px; }
+  .snaps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .snaps li { position: static; width: auto; transform: rotate(var(--r, 0deg)); }
+  .snaps-right { order: 3; }
+  .fold-hc .poly-in { padding: 40px 36px; }
+  .faq { grid-template-columns: 1fr; }
+  .snaps-left { margin-bottom: 30px; }
+  .snaps-right { margin-top: 22px; }
+}
+@media (max-width: 600px) {
+  /* Phones. Armand, 2026-09-18: the desktop layout was cramped here and
+   * the hero photos floated mid-air. Everything below is the phone layout. */
+
+  /* Hero: the desktop layout at phone size, measured against Armand's
+   * phone frame of 2026-09-18 at 390 px. Ribbon top left, LCD top right
+   * with the Pico behind its end, both bleeding off the top, wires bottom
+   * left. The frame has no Log in button, so it sits under the Pico. */
+  .landing-page::after { inset: 30px; }
+  .landing-page .hero { padding: 120px 24px 96px; }
+  .hero-copy { width: 100%; }
+  .badge { width: 40vw; top: 12.3vw; left: 2.5vw; }
+  /* Armand, 2026-09-18: smaller than the frame, the LCD starts right of the
+   * centre line, and the button sits in the frame corner over the props,
+   * as on desktop. */
+  .btn-login { top: 30px; right: 30px; }
+  .prop-display { width: 62vw; right: -4.4vw; top: -10.6vw; }
+  .prop-pico    { width: 27vw; right: -6.4vw; top: -18.5vw; }
+  .prop-wires   { width: 90vw; left: -36vw; top: 64svh; }
+  .title-img { width: 86%; }
+  .tagline { font-size: 1.25rem; }
+  .fineprint { font-size: .75rem; margin-bottom: 24px; }
+  .actions { gap: 10px; }
+  .landing-page .btn-lg { padding: 4px 12px; }
+  .rsvp input[type="email"] { font-size: 1.1rem; padding: 8px 14px; }
+  .landing-page .rsvp .btn-rsvp { font-size: 1.1rem; padding: 8px 16px; }
+  .rsvp-done { font-size: 1.1rem; }
+  .scroll-hint { bottom: 28px; }
+  .scroll-hint svg { width: 56px; height: 28px; }
+
+  /* Folds: tighter rhythm, headings on the 32 px grid. */
+  .folds { padding-bottom: 24px; }
+  /* 30 px frame inset plus 16 px, so no panel crosses the pink line. */
+  .fold { padding: 28px 46px 36px; }
+  /* The first panel's cuts are 7 percent left and 9 percent right of its width. */
+  .fold-what .poly-in { padding: 28px 44px 34px 40px; }
+
+  /* Cards: one column, text left and the drawing right. */
+  .cards { grid-template-columns: 1fr; gap: 14px; }
+  .cards .poly { transform: none; }
+  .card .poly-in { grid-template-columns: 1fr 120px; grid-template-rows: none; align-items: center;
+    gap: 16px; padding: 22px 22px 22px 26px; }
+  .card p { font-size: 1em; }
+  .how-img { width: 120px; }
+
+  /* Parts: two per row. */
+  .parts { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .part .poly-in { padding: 18px 16px 20px; min-height: 0; gap: 10px; }
+  .part-img { max-height: 80px; }
+  .part .img-slot { aspect-ratio: 4 / 3; font-size: .8rem; }
+  .part strong { font-size: .9em; }
+  .part-more strong { font-size: 32px; }
+
+  /* Hack Club: photos in a row of three above and below, smaller cuts on
+   * the panel so the centred text clears them. */
+  .fold-hc .heading { margin: 0 0 14px; }
+  .snaps { gap: 8px; margin: 12px 0; }
+  .snaps-left { margin-bottom: 28px; }
+  .snaps-right { margin-top: 20px; }
+  .snaps img { border-width: 2px; }
+  .fold-hc .poly, .fold-hc .poly-in {
+    clip-path: polygon(0 20px, 40px 0, 100% 0, 100% calc(100% - 28px), calc(100% - 50px) 100%, 24px 100%, 0 calc(100% - 24px)) !important;
+  }
+  .fold-hc .poly-in { padding: 30px 26px; }
+
+  .faq { gap: 14px; }
+  .faq-item .poly-in { padding: 26px 26px 28px 30px; min-height: 0; }
+  .faq dt { font-size: 1.05em; }
+  .cta-end { margin-top: 36px; }
+}
+@media (prefers-reduced-motion: reduce) { .scroll-hint { animation: none; } }

@@ -1,0 +1,200 @@
+/* The setup pages: the overview at /start, one screen per account, the
+ * finish line, the dashboard and the provisioning status page. Armand,
+ * 2026-09-18: no mat, no frame, no logo, no container. The content sits on
+ * a black ground with the landing panels' halftone along the bottom of the
+ * screen. Fonts, buttons and headings come from cyberdeck.css. */
+
+body:not(.landing-page) { background: var(--black); font-size: 16px; }
+/* The halftone band, fixed to the bottom of the viewport, behind everything. */
+body:not(.landing-page)::before {
+  content: ""; position: fixed; left: 0; right: 0; bottom: 0; height: min(40vh, 340px);
+  z-index: 0; pointer-events: none;
+  background: url("landing/halftone.svg") 30% bottom / auto 100% repeat-x;
+}
+
+/* Sign out, in the top right corner, when signed in. */
+.corner { position: absolute; top: 24px; right: 24px; z-index: 4; }
+.corner form { margin: 0; }
+
+/* One column, centred on the screen. Every screen fits the viewport
+ * without scrolling. Armand, 2026-09-18. No pixel headings here. */
+.flow {
+  max-width: 640px; margin: 0 auto; padding: 48px 32px;
+  min-height: 100svh; display: grid; align-content: center;
+}
+.flow-narrow { max-width: 520px; }
+.sheet { position: relative; }
+.title { font: inherit; font-size: 1.4em; color: var(--pink-pale); margin: 0 0 .75em; }
+
+.lede { margin: 0 0 1.25em; }
+.dim { color: var(--dim); }
+.small { font-size: .9em; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em;
+  background: rgba(255,255,255,.1); padding: 1px 5px;
+}
+
+/* Rows of actions at the foot of a panel. */
+.actions-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
+.actions-row form { margin: 0; }
+
+/* Something went wrong, said in a strip. */
+.alert-inline {
+  border-left: 3px solid var(--pink); background: rgba(255,0,98,.12);
+  padding: 8px 14px; margin: 0 0 18px; color: var(--pink-pale);
+}
+.alert-inline.is-ok { border-left-color: var(--pink-pale); background: rgba(255,255,255,.06); color: var(--ink); }
+.alert-inline a { color: var(--pink-pale); }
+
+/* --- the overview checklist ----------------------------------------------
+ * One list, hairline-divided. Two row variants share the same metrics so
+ * the rows keep a single height whatever the state:
+ *   to do   an <a> that fills the row, with a chevron at the right edge
+ *   done    a plain <div>. No link, no pointer, nothing to tab to. */
+.checklist {
+  list-style: none; margin: 0 0 20px; padding: 0;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.checklist li + li { border-top: 1px solid var(--rule); }
+.checklist-row {
+  display: grid; grid-template-columns: 20px 1fr; gap: 16px; align-items: start;
+  padding: 12px 10px; color: inherit; text-decoration: none;
+}
+.checklist-link { grid-template-columns: 20px 1fr auto; }
+/* A 20 px square with a 2 px pink border. Square corners, like the panels. */
+.checklist .check {
+  width: 20px; height: 20px; margin-top: 4px;
+  border: 2px solid var(--pink); display: grid; place-items: center; color: var(--black);
+}
+.checklist-text strong { display: block; font-weight: inherit; font-size: 1.05em; margin-bottom: 1px; color: var(--pink-pale); }
+.checklist-text span   { display: block; color: var(--dim); font-size: .95em; }
+.checklist li.is-done .check { background: var(--pink); }
+.checklist li.is-done .checklist-text strong { color: var(--dim); }
+.checklist-link:hover { background: rgba(255,0,98,.12); }
+.checklist-link:focus-visible { outline: 2px solid var(--pink-pale); outline-offset: -2px; }
+.checklist-go { align-self: center; display: grid; place-items: center; color: var(--pink); }
+.checklist-link:hover .checklist-go { color: var(--pink-pale); }
+
+/* --- progress bar --------------------------------------------------------
+ * Three numbered squares joined by a line that fills as steps complete.
+ * Pinned to the top of the screen. Armand, 2026-09-18: "pin this to the top". */
+.progress {
+  list-style: none; margin: 0; padding: 0;
+  position: fixed; top: 28px; left: 50%; transform: translateX(-50%); z-index: 3;
+  width: min(480px, calc(100vw - 48px));
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+}
+/* Room under the pinned bar, so a tall screen never slides beneath it. */
+.flow:has(.progress) { padding-top: 120px; }
+.progress-step { position: relative; display: grid; justify-items: center; gap: 8px; }
+.progress-step::before,
+.progress-step::after { content: ""; position: absolute; top: 13px; height: 2px; background: var(--rule); }
+.progress-step::before { left: 0; right: 50%; }
+.progress-step::after  { left: 50%; right: 0; }
+.progress-step:first-child::before,
+.progress-step:last-child::after { display: none; }
+.progress-step.done::before, .progress-step.done::after,
+.progress-step.current::before { background: var(--pink); }
+.progress-node {
+  position: relative; z-index: 1;
+  width: 28px; height: 28px; display: grid; place-items: center;
+  background: var(--black); border: 2px solid var(--rule);
+  font-size: 14px; color: var(--dim); font-variant-numeric: tabular-nums;
+}
+.progress-step.done .progress-node    { background: var(--pink); border-color: var(--pink); color: var(--black); }
+.progress-step.current .progress-node { border-color: var(--pink); color: var(--pink-pale); }
+.progress-label { font-size: .85em; color: var(--dim); text-align: center; }
+.progress-step.current .progress-label { color: var(--pink-pale); }
+
+/* Coming back from a provider: the node you just finished ticks over and
+ * the line fills, so the return reads as progress rather than a jump. */
+.progress-node, .progress-step::before, .progress-step::after, .progress-label {
+  transition: background-color .45s ease, border-color .45s ease, color .45s ease;
+}
+.progress-tick, .progress-num { grid-area: 1 / 1; transition: opacity .3s ease, transform .3s cubic-bezier(.2,1.3,.4,1); }
+.progress-num  { opacity: 0; transform: scale(.6); }
+.progress-tick { opacity: 1; transform: scale(1); }
+.progress.is-entering .progress-step.just .progress-node { background: var(--black); border-color: var(--rule); color: var(--dim); }
+.progress.is-entering .progress-step.just .progress-tick { opacity: 0; transform: scale(.4); }
+.progress.is-entering .progress-step.just .progress-num  { opacity: 1; transform: scale(1); }
+.progress.is-entering .progress-step.just::before,
+.progress.is-entering .progress-step.just::after { background: var(--rule); }
+
+/* --- one screen per account ----------------------------------------------- */
+.step .sheet { text-align: center; }
+.step .alert-inline { text-align: left; }
+.step-blurb { margin: 0 auto 20px; max-width: 30rem; }
+.step form { display: block; margin: 0; }
+.step button.wide { width: 100%; padding: 6px 16px; }
+/* The preview of GitHub's consent screen, pinned like a photo. */
+/* Sized by the viewport height, so the whole screen still fits. */
+.shot { display: grid; place-items: center; margin: 0 0 24px; }
+.shot-frame {
+  width: min(14rem, 26vh); padding: 6px; background: var(--paper);
+  transform: rotate(-1.5deg); box-shadow: 0 8px 22px rgba(0,0,0,.65);
+}
+.shot-frame .gh-consent { max-width: none; }
+/* A short window has no room for the drawing. The words still say what GitHub asks. */
+@media (max-height: 700px) { .shot { display: none; } .flow:has(.progress) { padding-top: 100px; } }
+@keyframes step-slide-in { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+.step .sheet > *:not(.progress) { animation: step-slide-in .45s cubic-bezier(.22,.8,.3,1) both; animation-delay: .18s; }
+
+/* --- the finish line: two ways to build ---------------------------------- */
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 4px; }
+.choice { border: 2px solid var(--rule); padding: 16px 18px 18px; display: grid; gap: 6px; align-content: start; }
+.choice.recommended { border-color: var(--pink); }
+.choice-tag { font-size: .8em; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 0; }
+.choice.recommended .choice-tag { color: var(--pink); }
+.choice strong { font-weight: inherit; font-size: 1.1em; color: var(--pink-pale); }
+.choice p { color: var(--dim); margin: 0 0 6px; font-size: .95em; }
+.choice form { margin-top: auto; }
+
+/* --- the projects page ---------------------------------------------------- */
+.board { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 12px; }
+.card {
+  border: 2px solid var(--rule); padding: 14px 18px;
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; align-items: center;
+  color: inherit; text-decoration: none;
+}
+.card:hover, .card:focus-visible { border-color: var(--pink); outline: none; }
+.card.is-ready { border-color: var(--pink); }
+.card strong { font-weight: inherit; font-size: 1.1em; color: var(--pink-pale); }
+.card span { color: var(--dim); font-size: .95em; }
+.card .card-status { grid-column: 2; grid-row: 1 / span 2; color: var(--pink-pale); }
+.clone { margin: 0 0 8px; padding: 10px 14px; background: rgba(255,255,255,.06); overflow-x: auto; }
+.clone code { background: none; padding: 0; font-size: .95em; }
+
+/* --- status lists: the project page --------------------------------------- */
+.steps { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.steps li { border-left: 3px solid var(--rule); padding: 6px 16px; display: grid; gap: 2px; }
+.steps li strong { font-weight: inherit; font-size: 1.05em; color: var(--pink-pale); }
+.steps li span { color: var(--dim); font-size: .95em; }
+.steps li.done { border-left-color: var(--pink); }
+.steps li.now  { border-left-color: var(--pink); animation: blink 1.2s steps(2, jump-none) infinite; }
+.steps li.bad  { border-left-color: var(--paper); }
+.steps li form { margin-top: 8px; }
+@keyframes blink { to { border-left-color: transparent; } }
+.ok  { color: var(--pink-pale); }
+.bad { color: var(--pink-pale); border-left: 3px solid var(--paper); padding-left: 16px; }
+
+/* --- phones --------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .corner { top: 16px; right: 16px; }
+  .progress { top: 72px; width: calc(100vw - 40px); }
+  .flow:has(.progress) { padding-top: 150px; }
+  .flow { padding: 72px 20px 40px; align-content: start; }
+  /* No chevron, and the blurb runs under the title at full width. */
+  .checklist-row, .checklist-link { grid-template-columns: 20px 1fr; padding: 14px 4px; gap: 12px; }
+  .checklist-go { display: none; }
+  .checklist-text span { font-size: .95em; }
+  .progress-label { font-size: .75em; }
+  .choices { grid-template-columns: 1fr; }
+  .card { grid-template-columns: 1fr; }
+  .card .card-status { grid-column: 1; grid-row: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress-node, .progress-step::before, .progress-step::after, .progress-label,
+  .progress-tick, .progress-num { transition: none; }
+  .step .sheet > *:not(.progress) { animation: none; }
+  .steps li.now { animation: none; }
+}

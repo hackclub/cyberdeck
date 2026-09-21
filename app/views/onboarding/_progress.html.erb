@@ -1,0 +1,50 @@
+<%# Labelled progress bar. Each grant is a node; the line between them fills
+    as they complete.
+
+    `just_completed` names a grant finished moments ago. That node renders as
+    done, but the bar starts in an "entering" state that paints it as not-yet
+    done. A script clears that class on the next frame, so the fill and the
+    tick animate in rather than appearing already finished. Without JS, or
+    with reduced motion, the finished state is simply what you see. %>
+<% done_keys = local_assigns.fetch(:done_keys) %>
+<% current   = local_assigns.fetch(:current, nil) %>
+<% just      = local_assigns.fetch(:just_completed, nil) %>
+<ol class="progress<%= " is-entering" if just %>" aria-label="Setup progress"
+    <%= "data-animate-from=#{just}" if just %>>
+  <% steps.each_with_index do |step, i| %>
+    <%
+      state = if done_keys.include?(step[:key]) then "done"
+              elsif step[:key] == current      then "current"
+              else "todo"
+              end
+    %>
+    <li class="progress-step <%= state %><%= " just" if step[:key] == just %>"
+        data-key="<%= step[:key] %>">
+      <span class="progress-node" aria-hidden="true">
+        <% if state == "done" %>
+          <%# An SVG tick centres on the grid; a text glyph rode its line box. %>
+          <svg class="progress-tick" viewBox="0 0 24 24" width="14" height="14" fill="none"
+               stroke="currentColor" stroke-width="3" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12.5 10 17.5 19 7"/>
+          </svg>
+          <span class="progress-num" aria-hidden="true"><%= i + 1 %></span>
+        <% else %>
+          <%= i + 1 %>
+        <% end %>
+      </span>
+      <span class="progress-label"><%= step[:label] %></span>
+    </li>
+  <% end %>
+</ol>
+
+<script>
+  // Clear the entering state on the next frame so the transitions run.
+  (function () {
+    var bar = document.currentScript.previousElementSibling;
+    if (!bar || !bar.classList.contains("is-entering")) return;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { bar.classList.remove("is-entering"); });
+    });
+  })();
+</script>

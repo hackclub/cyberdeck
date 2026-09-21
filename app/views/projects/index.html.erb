@@ -1,0 +1,39 @@
+<% content_for :title, "Your projects" %>
+<main class="flow">
+  <div class="sheet">
+      <p class="lede">Your projects, <%= @participant.first_name %>.</p>
+
+      <ul class="board">
+        <% @projects.each do |project| %>
+          <li>
+            <%= link_to project_path(project), class: "card #{"is-ready" if project.ready?}" do %>
+              <strong><%= project.name %></strong>
+              <span><%= project.repo_full_name || project.repo_name %></span>
+              <span class="card-status"><%= project_status_line(project) %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+
+      <% if @may_start_another %>
+        <div class="actions-row">
+          <%= button_to "Start another project", projects_path, params: { kind: "codespace" }, class: "primary" %>
+          <%= button_to "Another, in my own editor", projects_path, params: { kind: "local" }, class: "secondary" %>
+        </div>
+      <% elsif @projects.any?(&:setting_up?) %>
+        <p class="dim small">You can start another project once this one is set up.</p>
+      <% end %>
+
+      <% unless @participant.eligibility_confirmed? %>
+        <p class="dim small" style="margin-top: 24px">
+          <% if @participant.aged_out? %>
+            Hack Club Auth says you're over the age limit. You can still build. Before your
+            project counts, it'll need an age justification.
+          <% else %>
+            You don't have to verify your identity to build, but you do before you can ship.
+            <a href="https://auth.hackclub.com/">Verify now</a> if you want it out of the way.
+          <% end %>
+        </p>
+      <% end %>
+  </div>
+</main>

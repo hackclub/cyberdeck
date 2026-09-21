@@ -1,0 +1,67 @@
+<% content_for :title, "Getting set up" %>
+<main class="flow">
+  <div class="sheet">
+      <% if @returning %>
+        <p class="lede">You've connected <%= @done_keys.length %> of 3. Finish the rest whenever you like.</p>
+      <% else %>
+        <p class="lede">You'll write MicroPython for a simulated Pico in an editor that runs in your
+        browser. We set that up for you, but first you need to sign in to three things.</p>
+      <% end %>
+
+      <ol class="checklist">
+        <% [
+             ["hack_club", "Hack Club", "So we know who you are. It's the same account you use for everything else at Hack Club."],
+             ["hackatime", "Hackatime", "Tracks how long you spend coding. We check those hours when you ship."],
+             ["github",    "GitHub",    "Your code lives here, in a repo that's yours. It also runs the editor."]
+           ].each do |key, name, blurb| %>
+          <% done = @done_keys.include?(key) %>
+          <li class="<%= "is-done" if done %>">
+            <% if done %>
+              <%# A finished grant is not an action. Plain markup: no link, no hover,
+                  no pointer, nothing to tab to, and no action label. %>
+              <div class="checklist-row">
+                <span class="check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+                       stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+                    <path d="M5 12.5 10 17.5 19 7"/>
+                  </svg>
+                </span>
+                <div class="checklist-text">
+                  <strong><%= name %> connected</strong>
+                  <span><%= blurb %></span>
+                </div>
+              </div>
+            <% else %>
+              <%= link_to connect_path(provider: key), class: "checklist-row checklist-link" do %>
+                <span class="check" aria-hidden="true"></span>
+                <div class="checklist-text">
+                  <strong><%= name %></strong>
+                  <span><%= blurb %></span>
+                </div>
+                <span class="checklist-go" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                       stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+                    <path d="M9 5 16 12 9 19"/>
+                  </svg>
+                </span>
+              <% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+
+      <% if @next_key %>
+        <p class="dim">You need all three. Before you're sent anywhere, we show you exactly
+        what each one is going to ask for.</p>
+        <div class="actions-row">
+          <%= button_to(@returning ? "Continue" : "Start",
+                        connect_path(provider: @next_key), method: :get, class: "primary btn-lg") %>
+        </div>
+      <% else %>
+        <p class="dim">That's all three.</p>
+        <div class="actions-row">
+          <%= button_to "Continue", done_path, method: :get, class: "primary btn-lg" %>
+        </div>
+      <% end %>
+  </div>
+</main>

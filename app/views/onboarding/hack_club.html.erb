@@ -1,0 +1,18 @@
+<% content_for :title, "Sign in with Hack Club" %>
+<main class="flow flow-narrow step">
+  <div class="sheet">
+      <%= render "onboarding/progress", steps: @steps, done_keys: @done_keys, current: "hack_club", just_completed: @just_done %>
+
+      <% if @needs_first %>
+        <p class="alert-inline">Hack Club comes first. The other two accounts attach to it.</p>
+      <% end %>
+      <% if @declined %>
+        <p class="alert-inline">That didn't go through. We can't set anything up without knowing who you are, so try again.</p>
+      <% end %>
+
+      <p class="step-blurb">Your Hack Club account is how we know who you are. It's the same one
+      you use for everything else at Hack Club.</p>
+
+      <%= button_to "Sign in with Hack Club", "/auth/hack_club", class: "primary wide", data: { turbo: false } %>
+  </div>
+</main>

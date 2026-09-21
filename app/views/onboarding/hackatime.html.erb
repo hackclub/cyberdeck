@@ -1,0 +1,15 @@
+<% content_for :title, "Connect Hackatime" %>
+<main class="flow flow-narrow step">
+  <div class="sheet">
+      <%= render "onboarding/progress", steps: @steps, done_keys: @done_keys, current: "hackatime", just_completed: @just_done %>
+
+      <% if @declined %>
+        <p class="alert-inline">That didn't go through. Without Hackatime there's no record of your hours, so try again.</p>
+      <% end %>
+
+      <p class="step-blurb">Hackatime keeps track of the time you spend coding. When you ship your
+      cyberdeck, those hours are how we know how much work went into it.</p>
+
+      <%= button_to "Connect Hackatime", "/auth/hackatime", class: "primary wide", data: { turbo: false } %>
+  </div>
+</main>

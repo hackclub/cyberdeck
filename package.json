@@ -1,0 +1,8 @@
+{
+  "name": "cyberdeck",
+  "private": true,
+  "description": "Rails app. package.json exists only to hold local dev tooling.",
+  "devDependencies": {
+    "fallow": "^3.27.0"
+  }
+}

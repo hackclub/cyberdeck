@@ -1,0 +1,20 @@
+<% content_for :title, "Connect GitHub" %>
+<main class="flow flow-narrow step">
+  <div class="sheet">
+      <%= render "onboarding/progress", steps: @steps, done_keys: @done_keys, current: "github", just_completed: @just_done %>
+
+      <% if @declined %>
+        <p class="alert-inline">That didn't go through. Your code needs somewhere to live, so try again.</p>
+      <% end %>
+
+      <p class="step-blurb">Your code lives in a GitHub repo that's yours. We make it from our template
+      and open it in your browser. GitHub will ask for access to Codespaces and your public repos.</p>
+
+      <%# A drawn copy of GitHub's consent screen, so nobody is surprised by it. %>
+      <div class="shot">
+        <div class="shot-frame"><%= render "onboarding/github_consent" %></div>
+      </div>
+
+      <%= button_to "Connect GitHub", "/auth/github", class: "primary wide", data: { turbo: false } %>
+  </div>
+</main>

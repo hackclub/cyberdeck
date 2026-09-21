@@ -1,0 +1,59 @@
+<%# Polls while a run is in progress. A project whose run has reached a final
+    state never changes on its own, so it must not keep refreshing. %>
+<% if @run&.in_progress? %>
+  <meta http-equiv="refresh" content="3">
+<% end %>
+<% content_for :title, project_heading(@project).capitalize %>
+
+<main class="flow">
+  <div class="sheet">
+    <p class="dim small"><%= link_to "All projects", projects_path %></p>
+    <h1 class="title"><%= project_heading(@project).capitalize %></h1>
+      <ol class="steps">
+        <li class="<%= step_state(@run, "repo", @project.steps) %>">
+          <strong>Your repo</strong>
+          <span><%= @project.repo_full_name || @project.repo_name %></span>
+        </li>
+        <% if @project.codespace? %>
+          <li class="<%= step_state(@run, "secret", @project.steps) %>">
+            <strong>Your Hackatime key</strong>
+            <span>So your time counts from the moment the editor opens.</span>
+          </li>
+          <li class="<%= step_state(@run, "codespace", @project.steps) %>">
+            <strong>Your editor</strong>
+            <span>A Codespace in your browser, with MicroPython and the simulator ready.</span>
+          </li>
+        <% end %>
+      </ol>
+
+      <% if @project.ready? && @project.codespace? %>
+        <p class="ok">Ready! Open it and start building.</p>
+        <div class="actions-row">
+          <%= link_to "Open my editor", @project.codespace_url,
+                      class: "btn btn-lg", target: "_blank", rel: "noopener" %>
+          <%= link_to "See the repo", @project.repo_url, class: "secondary btn btn-lg", target: "_blank", rel: "noopener" %>
+        </div>
+        <p class="dim small" style="margin-top: 24px">Once you're in, press F1 and run
+        <code>Wokwi: Start Simulator</code>. The first time, Wokwi asks for a license: pick
+        <code>Request a New License</code> and confirm in the tab that opens. After that, every
+        time you save <code>main.py</code> your code runs on the board, and what it prints shows
+        up in the Wokwi terminal.</p>
+      <% elsif @project.ready? && @project.local? %>
+        <p class="ok">Your repo is ready. Clone it and open it in VS Code.</p>
+        <pre class="clone"><code>git clone https://github.com/<%= @project.repo_full_name %>.git</code></pre>
+        <div class="actions-row">
+          <%= link_to "See the repo", @project.repo_url, class: "btn btn-lg", target: "_blank", rel: "noopener" %>
+        </div>
+        <p class="dim small" style="margin-top: 24px">Install the Hackatime and Wokwi extensions
+        when VS Code asks. Put your Hackatime key in when the Hackatime extension asks for it,
+        so your hours count. Then press F1 and run <code>Wokwi: Start Simulator</code>.</p>
+      <% elsif @project.failed? || @project.gone? %>
+        <p class="bad"><%= @run&.error_message %></p>
+        <div class="actions-row">
+          <%= button_to "Try again", project_provisionings_path(@project), class: "primary btn-lg" %>
+        </div>
+      <% else %>
+        <p class="dim">This takes about a minute. The page updates itself.</p>
+      <% end %>
+  </div>
+</main>

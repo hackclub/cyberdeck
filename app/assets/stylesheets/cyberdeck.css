@@ -1,0 +1,148 @@
+/* The cyberdeck look, on every page. From Armand's Figma frames of
+ * 2026-09-17 and the landing page built from them (D-018).
+ *
+ *   ground   #1a1a1a. The landing page adds the cutting mat and the frame.
+ *   pink     #ff0062, the program colour
+ *   headings Cyberdeck Serif, pink with a white outline, tilted
+ *   body     American Typewriter, with Cutive from Google Fonts as fallback
+ *   panels   irregular clipped polygons, pink border, pink halftone
+ *
+ * landing.css holds the landing page's own layout. application.css holds
+ * the setup pages. Neither redefines anything in here. */
+
+@font-face {
+  font-family: "Cyberdeck Serif";
+  src: url("CyberdeckSerif-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  --ground: #1a1a1a;
+  --black: #000;
+  --pink: #ff0062;
+  --pink-pale: #ffe3ee;
+  --paper: #fff;
+  --ink: #fff;
+  --dim: #cfcfcf;
+  --rule: rgba(255,255,255,.22);
+  --heading: "Cyberdeck Serif", "Iowan Old Style", Georgia, serif;
+  --body: "American Typewriter", Cutive, "Courier New", serif;
+
+  margin: 0; padding: 0;
+  background: var(--ground);
+  color: var(--ink);
+  color-scheme: dark;
+  font-family: var(--body);
+  font-size: clamp(15px, 1.2vw, 18px); line-height: 1.55; font-weight: 400;
+  /* Grayscale smoothing. Subpixel smoothing fattens light text on a dark
+   * ground, which read as a heavier face than Figma shows. */
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100svh;
+}
+a { color: inherit; }
+
+/* Flash messages sit on the frame line, centred. */
+.flash {
+  position: absolute; z-index: 5; left: 50%; transform: translateX(-50%); top: 24px;
+  margin: 0; padding: 6px 16px; max-width: min(90vw, 46rem); overflow-wrap: anywhere;
+  background: var(--black); color: var(--pink-pale); border: 2px solid var(--pink);
+  font-size: .95rem;
+}
+
+/* --- buttons ---------------------------------------------------------- */
+/* One button, everywhere. A pale pink slab with a pink border and square
+ * corners, in the body face. <button> from button_to and .btn links match. */
+.btn, button {
+  display: inline-block; padding: 4px 14px; margin: 0;
+  font: inherit; font-size: 1.25rem; line-height: 1.3; text-decoration: none;
+  color: #111; border: 2px solid var(--pink); border-radius: 0;
+  background: var(--pink-pale); cursor: pointer;
+  transition: background-color .12s ease;
+}
+.btn:hover, button:hover { background: var(--paper); }
+.btn:focus-visible, button:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; }
+.btn-pink  { background: var(--pink-pale); }
+.btn-white { background: var(--paper); border-color: var(--paper); }
+.btn-lg    { padding: 4px 16px; }
+/* The quiet one: no fill, pale text. For sign out and other side exits. */
+.btn-quiet, button.secondary { background: transparent; color: var(--pink-pale); }
+.btn-quiet:hover, button.secondary:hover { background: var(--pink); color: var(--black); }
+
+/* --- headings ----------------------------------------------------------- */
+/* Cyberdeck Serif, Armand's pixelated Cormorant Garamond, drawn on a grid of
+ * 32 pixels per em. Sizes stay at whole multiples of 32 px so the pixels stay
+ * square: 64 px on desktop, 32 px on phones. The white outline is one font
+ * pixel wide, --px, built from eight hard shadows so its corners stay square.
+ * A text-stroke would round them. No drop shadow. Armand, 2026-09-18. */
+.heading {
+  --px: 2px;
+  font-family: var(--heading); font-weight: 600; font-size: 64px;
+  line-height: 1; margin: 0 0 32px; color: var(--pink);
+  letter-spacing: .01em;
+  text-shadow:
+    var(--px) 0 0 #fff, calc(-1 * var(--px)) 0 0 #fff,
+    0 var(--px) 0 #fff, 0 calc(-1 * var(--px)) 0 #fff,
+    var(--px) var(--px) 0 #fff, calc(-1 * var(--px)) var(--px) 0 #fff,
+    var(--px) calc(-1 * var(--px)) 0 #fff, calc(-1 * var(--px)) calc(-1 * var(--px)) 0 #fff;
+  -webkit-font-smoothing: none;
+}
+.heading-sm { font-size: 32px; --px: 1px; }
+.tilt { display: inline-block; transform: rotate(-6deg); transform-origin: left bottom; margin-left: -3%; }
+
+/* --- panels ------------------------------------------------------------- */
+/* Irregular clipped panel with a border. The outer box carries the stroke
+ * colour and a 2px padding. Both boxes take the same polygon, so where the
+ * inner box fills the outer one the border is about 2px wide.
+ *
+ * The border varies. --edge-t, --edge-r, --edge-b and --edge-l pull the
+ * inner box in from that side, so the pink shows wider there and the
+ * diagonal cuts no longer line up. On the "how it works" cards this
+ * happened by accident on 2026-09-18: the inner box was content sized
+ * and did not fill its column. Armand, 2026-09-21: "I think this is
+ * unintentional but I like this variable line width, can you add it to the
+ * other boxes." So the column is fixed to fill, and every panel sets its
+ * own edges inline. The default is 0, a plain 2px border. */
+.poly { clip-path: var(--shape); padding: 2px; transform: rotate(var(--tilt, 0deg)); display: grid;
+  grid-template-columns: minmax(0, 1fr); }
+/* Every panel border is the program pink. Armand, 2026-09-18. */
+.poly-pink  { background: var(--pink); }
+.poly-in {
+  clip-path: var(--shape); background: var(--black); position: relative;
+  padding: 36px 56px; box-sizing: border-box;
+  margin: var(--edge-t, 0) var(--edge-r, 0) var(--edge-b, 0) var(--edge-l, 0);
+}
+.poly-in p { margin: 0 0 1em; } .poly-in p:last-child { margin: 0; }
+.poly-in ol { margin: 0; padding-left: 1.4em; }
+.poly-in ol li { margin-bottom: .25em; }
+.poly-in.centered { text-align: center; }
+
+/* Pink halftone: circles, squares and triangles that shrink and thin out
+ * toward the top along a flame-shaped edge. One generated SVG tile, from
+ * script/halftone.py and script/halftone.json, scaled to the panel's height
+ * and repeated across, so the dots stay round whatever the panel's shape.
+ * Each panel shows a different slice of the same tile: --dot-shift moves
+ * the tile sideways and --dot-flip mirrors it. One file, many looks.
+ * Armand, 2026-09-18: a gradient of size and frequency, not of tone. */
+.halftone .poly-in::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: url("landing/halftone.svg") calc(50% + var(--dot-shift, 0%)) bottom / auto 100% repeat-x;
+  transform: scaleX(var(--dot-flip, 1));
+}
+.halftone .poly-in > * { position: relative; }
+
+/* --- phones ------------------------------------------------------------- */
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .btn, button { font-size: 1.05rem; padding: 4px 10px; }
+  .btn-lg { padding: 4px 12px; }
+  .heading { font-size: 32px; --px: 1px; margin-bottom: 18px; }
+  .tilt { margin-left: 2%; transform: rotate(-4deg); }
+  .poly-in { padding: 24px 22px; }
+}
+@media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }

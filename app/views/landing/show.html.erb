@@ -1,0 +1,199 @@
+<% content_for :title, "Make your first cyberdeck" %>
+<% content_for :body_class, "landing-page" %>
+<% content_for :no_chrome, "1" %>
+
+<%# The landing page. Built from Armand's Figma frames of 2026-09-17: a
+    cutting mat background, tilted pixel serif headings in the program pink,
+    irregular clipped panels, and one action. While sign-ups are closed the
+    action is an RSVP email box. When they open it is "Get started", into /start. %>
+
+<header class="hero" id="top">
+  <a class="badge" href="https://hackclub.com" aria-label="Hack Club">
+    <%= image_tag "landing/hack-club-2026.svg", alt: "Hack Club 2026" %>
+  </a>
+  <% if signups_open? %>
+    <%= link_to(signed_in? ? "Your setup" : "Log in", start_path, class: "btn btn-pink btn-login") %>
+  <% end %>
+
+  <%= image_tag "landing/display.png", alt: "", class: "prop prop-display" %>
+  <%= image_tag "landing/pico.png",    alt: "", class: "prop prop-pico" %>
+
+  <div class="hero-copy">
+    <h1 class="title">
+      <%= image_tag "landing/title.svg", alt: "Make your first cyberdeck", class: "title-img" %>
+    </h1>
+    <p class="tagline">And we’ll send you the parts to assemble it for free!</p>
+    <p class="fineprint">
+      A <a href="https://hackclub.com">Hack Club</a> program, by <a href="https://github.com/NanoMars">Armand</a>,
+      free for teenagers worldwide.
+    </p>
+    <% if signups_open? %>
+      <div class="actions">
+        <%= link_to(@complete ? "Continue" : "Get started", start_path, class: "btn btn-pink btn-lg") %>
+        <a class="btn btn-white btn-lg" href="#what">Learn more</a>
+      </div>
+    <% else %>
+      <%# Sign-ups are closed for now, so the one action is an RSVP email box.
+          Armand, 2026-09-21. SIGNUPS_OPEN=1 brings the buttons back. %>
+      <%= render "landing/rsvp", slot: "top" %>
+    <% end %>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <svg viewBox="0 0 80 40" width="80" height="40" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true">
+      <path d="M6 6 40 34 74 6"/>
+    </svg>
+  </div>
+</header>
+
+<%# The jumper wires run from the hero down into the first fold, under the
+    pink frame and under the panels, so they sit outside the hero. %>
+<%= image_tag "landing/jumper-wires.png", alt: "", class: "prop prop-wires" %>
+
+<main class="folds">
+
+  <section class="fold fold-what" id="what">
+    <h2 class="heading tilt">what is a cyberdeck?</h2>
+    <div class="poly poly-pink halftone" style="--shape: polygon(7% 0, 97% 1%, 100% 22%, 91% 100%, 4% 96%, 0 78%); --dot-shift: 12%; --edge-r: 16px; --edge-b: 5px">
+      <div class="poly-in">
+        <p>A cyberdeck is a computer you make yourself.</p>
+        <%# Armand's wording, 2026-09-21. Input before output. Armand. %>
+        <p>Think of it as an app on your phone, but physical. It can be anything you want. For this program it has 3 requirements:</p>
+        <ol>
+          <li>It uses a Raspberry Pi Pico as its brain.</li>
+          <li>It takes some kind of input, whether that is a button or a sensor.</li>
+          <li>It has an output, whether that is a screen, a light or a sound.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="fold fold-how" id="how">
+    <h2 class="heading tilt">how it works</h2>
+    <%# Armand's four step drawings of 2026-09-18, white lines on transparent. %>
+    <ol class="cards">
+      <li class="poly poly-pink card halftone" style="--shape: polygon(0 18px, 24px 0, 100% 0, 100% calc(100% - 26px), calc(100% - 20px) 100%, 0 100%); --tilt: -2deg; --dot-shift: 8%; --edge-r: 18px; --edge-b: 4px">
+        <div class="poly-in">
+          <p><span class="num">1.</span> Follow the guide to design and program your cyberdeck!</p>
+          <%= image_tag "landing/how-1.png", alt: "Drawing of a raccoon coding on a laptop", class: "how-img", loading: "lazy" %>
+        </div>
+      </li>
+      <li class="poly poly-pink card halftone" style="--shape: polygon(0 0, calc(100% - 26px) 0, 100% 24px, 100% 100%, 20px 100%, 0 calc(100% - 14px)); --tilt: 1.5deg; --dot-shift: 41%; --dot-flip: -1; --edge-r: 14px; --edge-b: 9px">
+        <div class="poly-in">
+          <p><span class="num">2.</span> Ship your project so other people can experience it!</p>
+          <%= image_tag "landing/how-2.png", alt: "Drawing of a raccoon sailing a boat with a parcel aboard", class: "how-img", loading: "lazy" %>
+        </div>
+      </li>
+      <li class="poly poly-pink card halftone" style="--shape: polygon(16px 0, calc(100% - 16px) 0, 100% 20px, 100% 100%, 0 100%, 0 28px); --tilt: -1deg; --dot-shift: 73%; --edge-r: 18px; --edge-b: 6px">
+        <div class="poly-in">
+          <p><span class="num">3.</span> We ship your parts to you!</p>
+          <%= image_tag "landing/how-3.png", alt: "Drawing of a raccoon carrying a parcel", class: "how-img", loading: "lazy" %>
+        </div>
+      </li>
+      <li class="poly poly-pink card halftone" style="--shape: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 24px) 100%, 18px 100%, 0 calc(100% - 12px)); --tilt: 2deg; --dot-shift: 22%; --dot-flip: -1; --edge-r: 13px; --edge-b: 7px">
+        <div class="poly-in">
+          <p><span class="num">4.</span> Assemble your cyberdeck!</p>
+          <%= image_tag "landing/how-4.png", alt: "Drawing of a raccoon cheering beside a finished cyberdeck", class: "how-img", loading: "lazy" %>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="fold fold-parts" id="parts">
+    <h2 class="heading tilt">What can I use?</h2>
+    <ul class="parts">
+      <% [
+           ["Raspberry Pi Pico", "landing/pico.png",         "polygon(28px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 14px) 100%, 0 100%, 0 30px)"],
+           ["16×2 LCD display",  "landing/display.png",      "polygon(0 14px, 20px 0, calc(100% - 30px) 0, 100% 22px, 100% 100%, 0 100%)"],
+           ["Jumper wires",      "landing/jumper-wires.png", "polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 20px) 100%, 24px 100%, 0 calc(100% - 18px))"],
+           ["Breadboard",        "landing/breadboard.png",                       "polygon(0 0, calc(100% - 30px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 30px) 100%, 0 100%)"],
+           ["Buttons",           "landing/buttons.png",                          "polygon(22px 0, 100% 0, 100% 100%, 26px 100%, 0 calc(100% - 20px), 0 24px)"],
+           ["and more…",         :more,                      "polygon(0 10px, 18px 0, calc(100% - 18px) 0, 100% 16px, 100% calc(100% - 24px), calc(100% - 28px) 100%, 0 100%)"],
+         ].each_with_index do |(name, img, shape), i| %>
+        <li class="poly poly-pink part halftone<%= " part-more" if img == :more %>" style="--shape: <%= shape %>; --dot-shift: <%= (i * 37) % 100 %>%; --dot-flip: <%= i.odd? ? -1 : 1 %>; --edge-r: <%= [12, 9, 15, 10, 14, 11][i] %>px; --edge-b: <%= [5, 7, 4, 8, 5, 6][i] %>px">
+          <div class="poly-in">
+            <%# The last tile is "and more…", text only. Armand, 2026-09-18. %>
+            <% if img && img != :more %>
+              <%= image_tag img, alt: "", class: "part-img" %>
+            <% end %>
+            <strong><%= name %></strong>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="fold fold-hc" id="hack-club">
+    <div class="hc-row">
+      <%# Social proof: photos from Hack Club events, three each side, tilted
+          and overlapping like a pinboard. Alt text names the event kind. %>
+      <ul class="snaps snaps-left" aria-label="Hack Club events">
+        <li style="--r: -5deg"><%= image_tag "landing/hc/1.jpg", alt: "About 80 Hack Clubbers in front of a Midnight, case solved screen" %></li>
+        <li style="--r: 3deg"><%= image_tag "landing/hc/2.jpg", alt: "Hack Clubbers at laptops around a long table" %></li>
+        <li style="--r: -2deg"><%= image_tag "landing/hc/3.jpg", alt: "A bonfire on a beach at night" %></li>
+      </ul>
+      <div class="hc-center">
+      <h2 class="heading tilt">what is hack club?</h2>
+      <div class="poly poly-pink halftone" style="--shape: polygon(0 30px, 60px 0, 100% 0, 100% calc(100% - 50px), calc(100% - 90px) 100%, 40px 100%, 0 calc(100% - 40px)); --dot-shift: 55%; --edge-r: 20px; --edge-b: 6px">
+        <div class="poly-in centered">
+          <p><a href="https://hackclub.com">Hack Club</a> is a 501(c)(3) nonprofit that runs programs and events to encourage more students to build and publish engineering projects.</p>
+          <p>We’re a community of 100,000+ high schoolers in 119 countries who learn by building things. Artists, engineers, hardware makers, game devs: everyone’s welcome, and nobody needs experience to start.</p>
+          <p>Curious about Hack Club? Learn more about our <a href="https://hackclub.com/philosophy">philosophy</a>, <a href="https://hackclub.com/philanthropy">donors</a> or <a href="https://hackclub.com">other programs</a>.</p>
+        </div>
+      </div>
+      </div>
+      <ul class="snaps snaps-right" aria-label="Hack Club events">
+        <li style="--r: 4deg"><%= image_tag "landing/hc/4.jpg", alt: "Three Hack Clubbers looking at a phone together" %></li>
+        <li style="--r: -3deg"><%= image_tag "landing/hc/5.jpg", alt: "A group photo on a hilltop" %></li>
+        <li style="--r: 2deg"><%= image_tag "landing/hc/6.jpg", alt: "Two Hack Clubbers wiring a circuit next to a laptop" %></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="fold fold-faq" id="faq">
+    <h2 class="heading tilt">FAQ</h2>
+    <dl class="faq">
+      <% [
+           ["Am I eligible?",
+            "Yes, if you are a teenager. Hack Club programs are for people aged 13 to 18, anywhere in the world.",
+            "polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 28px) 100%, 0 100%, 0 26px)"],
+           ["Is this legit?",
+            "Yes. Hack Club is a 501(c)(3) nonprofit and has shipped hardware to teenagers through programs like this one for years. Ask anyone in the Hack Club Slack.",
+            "polygon(0 0, calc(100% - 24px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 28px))"],
+           ["What can I make?",
+            "Anything with a Raspberry Pi Pico for a brain and at least one input. A tiny handheld, a desk gadget, a sensor station, a game console. You decide.",
+            "polygon(0 16px, 30px 0, calc(100% - 20px) 0, 100% 10px, 100% 100%, 0 100%)"],
+           ["What if I’ve never done electronics before?",
+            "Then you are exactly who this is for. The guide starts from zero, and you write and run your code in a simulator in the browser before any parts arrive.",
+            "polygon(16px 0, 100% 0, 100% calc(100% - 26px), calc(100% - 30px) 100%, 14px 100%, 0 calc(100% - 18px), 0 12px)"],
+         ].each_with_index do |(q, a, shape), i| %>
+        <div class="poly poly-pink faq-item halftone" style="--shape: <%= shape %>; --dot-shift: <%= (i * 29 + 60) % 100 %>%; --dot-flip: <%= i.odd? ? 1 : -1 %>; --edge-r: <%= [14, 10, 18, 12][i] %>px; --edge-b: <%= [5, 8, 4, 7][i] %>px">
+          <div class="poly-in">
+            <dt><%= q %></dt>
+            <dd><%= a %></dd>
+          </div>
+        </div>
+      <% end %>
+    </dl>
+    <div class="cta-end" id="rsvp-end">
+      <% if signups_open? %>
+        <%= link_to(@complete ? "Continue" : "Get started", start_path, class: "btn btn-pink btn-lg") %>
+      <% else %>
+        <%= render "landing/rsvp", slot: "rsvp-end" %>
+      <% end %>
+    </div>
+  </section>
+
+  <%# The Hack Club handbook's Promise Policy: every YSWS website links the
+      privacy policy and terms, and the fulfillment bounty, in the footer.
+      The Gap Year's name sits above the fold in the hero fine print.
+      Three lowercase words, as on jamegam's footer. Armand, 2026-09-21. %>
+  <footer class="foot">
+    <p>A <a href="https://hackclub.com">Hack Club</a> program, run by <a href="https://github.com/NanoMars">Armand</a>.</p>
+    <p class="foot-links">
+      <a href="https://hackclub.com/privacy-and-terms">privacy policy</a>
+      <a href="https://forms.hackclub.com/bounty">fulfillment</a>
+      <a href="https://hackclub.com">hack club</a>
+    </p>
+  </footer>
+</main>
