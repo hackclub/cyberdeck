@@ -18,7 +18,8 @@
       <%= f.button "RSVP", type: "submit", class: "btn btn-rsvp" %>
     </div>
     <%= f.hidden_field :slot, value: slot %>
-    <% (@utm || {}).each do |key, value| %>
+    <%# A fallback for a browser that refuses the cookie. Same values. %>
+    <% utm.each do |key, value| %>
       <%= f.hidden_field key, value: value %>
     <% end %>
     <%# The honeypot. A person never sees it. A bot fills it and is dropped. %>

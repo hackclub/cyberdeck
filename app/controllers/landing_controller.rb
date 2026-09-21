@@ -9,7 +9,5 @@ class LandingController < ApplicationController
   def show
     @complete = signed_in? && current_participant.hackatime_api_key.present? &&
                 current_participant.github_token.present?
-    # utm parameters on the link, carried into the RSVP row as hidden fields.
-    @utm = params.permit(*Rsvp::UTM).to_h.transform_values { |v| v.to_s.first(200) }.compact_blank
   end
 end

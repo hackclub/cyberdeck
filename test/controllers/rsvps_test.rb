@@ -65,6 +65,48 @@ class RsvpsTest < ActionDispatch::IntegrationTest
     assert_select "form.rsvp input[name=ref]", 0
   end
 
+  test "a utm link is remembered without the address bar" do
+    get root_path(utm_source: "slack", utm_campaign: "eoi")
+    # A later page with a bare URL still knows them.
+    get root_path
+    assert_select "form.rsvp input[type=hidden][name=utm_source][value=slack]", 2
+    post rsvp_path, params: { email: "ada@example.com" }
+    rsvp = Rsvp.sole
+    assert_equal "slack", rsvp.utm_source
+    assert_equal "eoi", rsvp.utm_campaign
+  end
+
+  test "a typo does not lose the attribution" do
+    get root_path(utm_source: "slack")
+    post rsvp_path, params: { email: "not an email" }
+    assert_equal 0, Rsvp.count
+    # The retry carries no parameters of its own, and is still credited.
+    post rsvp_path, params: { email: "ada@example.com" }
+    assert_equal "slack", Rsvp.sole.utm_source
+  end
+
+  test "the most recent utm link wins" do
+    get root_path(utm_source: "slack", utm_campaign: "first")
+    get root_path(utm_source: "friend")
+    post rsvp_path, params: { email: "ada@example.com" }
+    rsvp = Rsvp.sole
+    assert_equal "friend", rsvp.utm_source
+    assert_nil rsvp.utm_campaign
+  end
+
+  test "the address bar is stripped only when it still holds them" do
+    get root_path(utm_source: "slack")
+    assert_select "header.hero[data-controller=utm]", 1
+    get root_path
+    assert_select "header.hero[data-controller=utm]", 0
+  end
+
+  test "a post carries its own utm over the cookie" do
+    get root_path(utm_source: "slack")
+    post rsvp_path, params: { email: "ada@example.com", utm_source: "posted" }
+    assert_equal "posted", Rsvp.sole.utm_source
+  end
+
   test "with a Fillout form the RSVP goes on to it with the email filled" do
     Rails.configuration.x.fillout_url = FORM
     post rsvp_path, params: { email: "ada@example.com" }

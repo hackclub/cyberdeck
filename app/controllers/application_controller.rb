@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
+  include UtmCapture
+
   allow_browser versions: :modern
 
   helper_method :current_participant, :signed_in?, :signups_open?

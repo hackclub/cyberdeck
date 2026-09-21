@@ -20,8 +20,10 @@ class RsvpsController < ApplicationController
     # A filled honeypot is a bot. Say yes, keep nothing, send it nowhere.
     return done if params[HONEYPOT].present?
 
-    rsvp = Rsvp.new(email: params[:email], ip: client_ip, country: country,
-                    **params.permit(*Rsvp::UTM).to_h.transform_values { |v| v.to_s.first(200) })
+    # The cookie is the source. The posted hidden fields win when they are
+    # there, which covers a browser that refuses cookies.
+    posted = params.permit(*Rsvp::UTM).to_h.transform_values { |v| v.to_s.first(200) }.compact_blank
+    rsvp = Rsvp.new(email: params[:email], ip: client_ip, country: country, **utm.merge(posted))
     return onward(rsvp.email) if rsvp.save
 
     # The same email twice is not an error. The row is already there.

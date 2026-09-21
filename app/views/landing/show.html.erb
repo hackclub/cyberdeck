@@ -7,7 +7,7 @@
     irregular clipped panels, and one action. While sign-ups are closed the
     action is an RSVP email box. When they open it is "Get started", into /start. %>
 
-<header class="hero" id="top">
+<header class="hero" id="top"<%= " data-controller=\"utm\"".html_safe if utm_in_url? %>>
   <a class="badge" href="https://hackclub.com" aria-label="Hack Club">
     <%= image_tag "landing/hack-club-2026.svg", alt: "Hack Club 2026" %>
   </a>
