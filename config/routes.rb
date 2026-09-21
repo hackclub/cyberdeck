@@ -28,4 +28,10 @@ Rails.application.routes.draw do
   end
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Short links, last so every named route above wins. A code is 2 to 24
+  # characters of lowercase letters, numbers and hyphens, and lives in
+  # config/links.yml. See wiki/decisions/D-027-short-links.md.
+  get "/:code", to: "links#show", as: :short_link,
+      constraints: { code: ShortLink::ROUTE }
 end

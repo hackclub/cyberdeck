@@ -30,13 +30,21 @@ module UtmCapture
 
   def capture_utm
     return if utm_from_url.empty?
+
+    store_utm(utm_from_url)
+  end
+
+  # Also called by LinksController, which gets its values from a short code
+  # rather than the address bar.
+  def store_utm(values)
+    return if values.blank?
     return if !OVERWRITE && utm_from_cookie.any?
 
     cookies.signed[COOKIE] = {
-      value: utm_from_url.to_json, expires: TTL.from_now,
+      value: values.to_json, expires: TTL.from_now,
       httponly: true, same_site: :lax, secure: request.ssl?
     }
-    @utm = utm_from_url
+    @utm = values
   end
 
   # What the RSVP row is stamped with. The cookie, or the address bar on the

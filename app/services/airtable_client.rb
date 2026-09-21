@@ -19,6 +19,26 @@ class AirtableClient
     @base  = base
   end
 
+  # Every record in a table, following pagination. Returns the raw rows.
+  def list(table)
+    rows = []
+    offset = nil
+    loop do
+      uri = URI("#{API}/#{@base}/#{ERB::Util.url_encode(table)}")
+      uri.query = URI.encode_www_form({ pageSize: 100, offset: offset }.compact)
+      response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 15) do |http|
+        http.request(Net::HTTP::Get.new(uri, "Authorization" => "Bearer #{@token}"))
+      end
+      raise Error, "Airtable #{response.code} on #{table}: #{response.body.to_s.first(300)}" unless response.is_a?(Net::HTTPSuccess)
+
+      body = JSON.parse(response.body)
+      rows.concat(body.fetch("records", []))
+      offset = body["offset"]
+      break if offset.blank?
+    end
+    rows
+  end
+
   # Upserts one record. Returns the Airtable record id.
   def upsert(table, fields, merge_on:)
     uri = URI("#{API}/#{@base}/#{ERB::Util.url_encode(table)}")
