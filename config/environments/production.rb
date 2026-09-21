@@ -77,8 +77,11 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Only this host, plus the health check Orchard calls by IP.
-  config.hosts = [ "cyberdeck.hackclub.com" ]
+  # The program's own host, plus Orchard's generated preview host, which is
+  # how the app is reached before DNS points at it. EXTRA_HOSTS adds more,
+  # comma separated. See wiki/decisions/D-024-host-and-repo.md.
+  config.hosts = [ "cyberdeck.hackclub.com", /\A[a-z0-9-]+\.k\.hackclub\.dev\z/ ]
+  config.hosts += ENV["EXTRA_HOSTS"].to_s.split(",").map(&:strip).reject(&:empty?)
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
