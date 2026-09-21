@@ -5,7 +5,12 @@
 <% if flash[:rsvp_done] %>
   <p class="rsvp-done" aria-live="polite"><%= flash[:rsvp_done] %></p>
 <% else %>
-  <%= form_with url: rsvp_path, method: :post, class: "rsvp", data: { turbo: false, controller: "prefill" } do |f| %>
+  <%# target _blank: the form opens in a new tab, which follows the redirect
+      to Fillout. The landing page stays put in the tab behind it.
+      Armand, 2026-09-21. %>
+  <%= form_with url: rsvp_path, method: :post, class: "rsvp",
+                html: { target: "_blank", rel: "noopener" },
+                data: { turbo: false, controller: "prefill" } do |f| %>
     <div class="rsvp-row">
       <%= f.email_field :email, value: flash[:rsvp_email], placeholder: "your@email.here",
                         autocomplete: "email", required: true, aria: { label: "Your email" },
