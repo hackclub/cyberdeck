@@ -8,6 +8,8 @@
 # bots fill, a per-address rate limit, and a repeat submit that reads as
 # success rather than as an error. See D-023.
 class RsvpsController < ApplicationController
+  include LandingPage
+
   HONEYPOT = :company
   DONE     = "You’re in! We’ll email you when sign-ups open."
   INVALID  = "That doesn’t look like an email. Try again?"
@@ -20,18 +22,18 @@ class RsvpsController < ApplicationController
     # A filled honeypot is a bot. Say yes, keep nothing, send it nowhere.
     return done if params[HONEYPOT].present?
 
-    # The cookie is the source. The posted hidden fields win when they are
-    # there, which covers a browser that refuses cookies.
-    posted = params.permit(*Rsvp::UTM).to_h.transform_values { |v| v.to_s.first(200) }.compact_blank
-    rsvp = Rsvp.new(email: params[:email], ip: client_ip, country: country, **utm.merge(posted))
+    # The hidden fields of the form are the only source. See D-029.
+    rsvp = Rsvp.new(email: params[:email], ip: client_ip, country: country, **utm)
     return onward(rsvp.email) if rsvp.save
 
     # The same email twice is not an error. The row is already there.
     return onward(rsvp.email) if rsvp.errors.of_kind?(:email, :taken)
 
-    flash[:rsvp_error] = INVALID
-    flash[:rsvp_email] = params[:email].to_s.first(Rsvp::MAX_EMAIL)
-    redirect_to root_path(anchor: slot), status: :see_other
+    # Render rather than redirect. A redirect drops the posted hidden fields,
+    # and nothing on the device remembers them. See D-029.
+    flash.now[:rsvp_error] = INVALID
+    flash.now[:rsvp_email] = params[:email].to_s.first(Rsvp::MAX_EMAIL)
+    render_landing(status: 422)
   end
 
   private

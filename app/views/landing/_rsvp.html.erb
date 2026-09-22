@@ -18,7 +18,8 @@
       <%= f.button "RSVP", type: "submit", class: "btn btn-rsvp" %>
     </div>
     <%= f.hidden_field :slot, value: slot %>
-    <%# A fallback for a browser that refuses the cookie. Same values. %>
+    <%# The only carrier for the attribution. Nothing is stored on the
+        device, so these fields are it. See D-029. %>
     <% utm.each do |key, value| %>
       <%= f.hidden_field key, value: value %>
     <% end %>

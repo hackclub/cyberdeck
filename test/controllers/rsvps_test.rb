@@ -65,44 +65,50 @@ class RsvpsTest < ActionDispatch::IntegrationTest
     assert_select "form.rsvp input[name=ref]", 0
   end
 
-  test "a utm link is remembered without the address bar" do
+  test "the page carries its utm into the form, and the form back to the row" do
     get root_path(utm_source: "slack", utm_campaign: "eoi")
-    # A later page with a bare URL still knows them.
-    get root_path
-    assert_select "form.rsvp input[type=hidden][name=utm_source][value=slack]", 2
-    post rsvp_path, params: { email: "ada@example.com" }
+    post rsvp_path, params: { email: "ada@example.com" }.merge(form_utm)
     rsvp = Rsvp.sole
     assert_equal "slack", rsvp.utm_source
     assert_equal "eoi", rsvp.utm_campaign
   end
 
-  test "a typo does not lose the attribution" do
+  test "nothing is kept on the device, so a later bare page carries no source" do
     get root_path(utm_source: "slack")
-    post rsvp_path, params: { email: "not an email" }
-    assert_equal 0, Rsvp.count
-    # The retry carries no parameters of its own, and is still credited.
+    get root_path
+    assert_select "form.rsvp input[type=hidden][name=utm_source]", 0
     post rsvp_path, params: { email: "ada@example.com" }
+    assert_nil Rsvp.sole.utm_source
+  end
+
+  test "a cookie left over from D-026 is expired and never read" do
+    cookies[:utm] = { "utm_source" => "stale" }.to_json
+    get root_path
+    assert_select "form.rsvp input[type=hidden][name=utm_source]", 0
+    assert_match(/utm=;/, set_cookie_header)
+    post rsvp_path, params: { email: "ada@example.com" }
+    assert_nil Rsvp.sole.utm_source
+  end
+
+  test "a typo keeps its source, because the page is rendered again" do
+    post rsvp_path, params: { email: "not an email", utm_source: "slack" }
+    assert_response 422
+    assert_equal 0, Rsvp.count
+    # The form comes back with the attribution still in it, so the retry is
+    # credited without anything being stored.
+    assert_select "form.rsvp input[type=hidden][name=utm_source][value=slack]", 2
+    post rsvp_path, params: { email: "ada@example.com" }.merge(form_utm)
     assert_equal "slack", Rsvp.sole.utm_source
   end
 
-  test "the most recent utm link wins" do
-    get root_path(utm_source: "slack", utm_campaign: "first")
-    get root_path(utm_source: "friend")
-    post rsvp_path, params: { email: "ada@example.com" }
-    rsvp = Rsvp.sole
-    assert_equal "friend", rsvp.utm_source
-    assert_nil rsvp.utm_campaign
-  end
-
-  test "the address bar is stripped only when it still holds them" do
+  test "the address bar is rewritten only when it needs it" do
     get root_path(utm_source: "slack")
     assert_select "header.hero[data-controller=utm]", 1
     get root_path
     assert_select "header.hero[data-controller=utm]", 0
   end
 
-  test "a post carries its own utm over the cookie" do
-    get root_path(utm_source: "slack")
+  test "a post is stamped with the utm it carries" do
     post rsvp_path, params: { email: "ada@example.com", utm_source: "posted" }
     assert_equal "posted", Rsvp.sole.utm_source
   end
@@ -134,8 +140,9 @@ class RsvpsTest < ActionDispatch::IntegrationTest
   test "a bad email is refused and shown again" do
     post rsvp_path, params: { email: "not an email" }
     assert_equal 0, Rsvp.count
-    assert_equal RsvpsController::INVALID, flash[:rsvp_error]
-    assert_equal "not an email", flash[:rsvp_email]
+    assert_response 422
+    assert_select "p.rsvp-error", RsvpsController::INVALID
+    assert_select "form.rsvp input[type=email][value=?]", "not an email"
   end
 
   test "a filled honeypot is dropped, told yes, and not sent to the form" do
