@@ -22,8 +22,9 @@ class GithubClient
     end
   end
 
-  # Worth retrying: a server-side blip, or a resource GitHub has not made
-  # visible yet. Everything else is a decision GitHub will repeat.
+  # Worth retrying: a server-side blip, a resource GitHub has not made
+  # visible yet, or a 429 that asks us to slow down. Everything else is a
+  # decision GitHub will repeat.
   class TransientError < Error; end
 
   def initialize(token)
@@ -166,10 +167,19 @@ class GithubClient
       rescue StandardError
         nil
       end
+      # A 429 is GitHub's own throttle, so its body is safe to log. Without
+      # it, and without Retry-After, a refusal says nothing about why.
+      if status == 429
+        detail ||= res.body.to_s.squish.first(200).presence
+        retry_after = res["retry-after"]
+        wait = "retry-after #{retry_after}s" if retry_after
+        detail = [ detail, wait ].compact.join(", ").presence
+      end
       message = "GitHub #{klass::METHOD} #{path} -> #{status}#{" #{detail}" if detail}"
       # 5xx is GitHub having a moment. 404 right after a write is GitHub not
-      # having caught up yet. Neither is a verdict. Anything else is.
-      klass_for = (status >= 500 || status == 404) ? TransientError : Error
+      # having caught up yet. 429 is a request to wait. None is a verdict.
+      # Anything else is.
+      klass_for = (status >= 500 || status == 404 || status == 429) ? TransientError : Error
       raise klass_for.new(message, status: status, body: detail)
     end
 
