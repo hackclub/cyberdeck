@@ -44,6 +44,13 @@ class SessionsController < ApplicationController
     info = auth.info
     raw  = auth.extra&.raw_info || {}
 
+    # While sign-ups are closed only a Hack Club address gets in. Checked
+    # before anything is saved. See D-030.
+    unless Rails.configuration.x.signups_open || EarlyAccess.email?(info.email)
+      reset_session
+      return redirect_to root_path, notice: "Sign-ups aren’t open yet! Leave your email and we’ll let you know."
+    end
+
     participant = Participant.find_or_initialize_by(hca_id: auth.uid)
     participant.assign_attributes(
       email: info.email,

@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   # wiki/decisions/D-022-signups-closed-rsvp.md.
   post "/rsvp", to: "rsvps#create", as: :rsvp
   get "/start", to: "onboarding#intro", as: :start
+  # The hidden way in for Hack Club email addresses. See D-030.
+  get "/early/:token", to: "early_access#show", as: :early_access
 
   # One screen per OAuth grant, shown before the participant is sent anywhere.
   get "/connect/:provider", to: "onboarding#connect", as: :connect

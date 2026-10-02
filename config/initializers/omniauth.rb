@@ -16,9 +16,12 @@ OmniAuth.config.on_failure = proc { |env| SessionsController.action(:failure).ca
 # SessionsController#failure, which sends it to the landing page. The
 # onboarding screens that hold the real buttons are gated separately.
 # omniauth-rails_csrf_protection uses request_validation_phase, so this hook
-# is free. See wiki/decisions/D-022-signups-closed-rsvp.md.
-OmniAuth.config.before_request_phase = proc { |_env|
-  raise OmniAuth::Error, "Sign-ups are closed" unless Rails.configuration.x.signups_open
+# is free. A browser that used the hidden link passes. See D-022 and D-030.
+OmniAuth.config.before_request_phase = proc { |env|
+  open_for_all = Rails.configuration.x.signups_open
+  unless open_for_all || EarlyAccess.session?(env["rack.session"])
+    raise OmniAuth::Error, "Sign-ups are closed"
+  end
 }
 
 creds = Rails.application.credentials

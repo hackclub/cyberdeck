@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   private
 
   # Closed unless SIGNUPS_OPEN=1. See config/application.rb.
-  def signups_open? = Rails.configuration.x.signups_open
+  def signups_open? = Rails.configuration.x.signups_open || EarlyAccess.session?(session)
 
   # Every route into the login chain. While sign-ups are closed they all
   # land back on the landing page and its RSVP box.
