@@ -65,7 +65,7 @@ end
 
 # --- cyberdeck ---------------------------------------------------------------
 # Three OAuth providers. See wiki/concepts/one-click-login.md in the program wiki.
-gem "omniauth", "~> 2.1"
+gem "omniauth", "~> 2.2"
 gem "omniauth-hack_club"                 # Hack Club Auth, maintained by Nora at Hack Club
 gem "omniauth-oauth2", "~> 1.9"          # base for the Hackatime strategy in lib/
 gem "omniauth-github", "~> 2.0"          # GitHub, user-to-server
